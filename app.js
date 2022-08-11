@@ -40,10 +40,10 @@ const port = process.env.AUTH_PORT || 3000;
 const tokenSecret = 'secret-word'; //process.env.AUTH_TOKEN_SECRET;
 const defaultUser = 'user'; // default user when no username supplied
 const expiryDays = 7;
-const cookieSecure =
-  'AUTH_COOKIE_SECURE' in process.env
-    ? process.env.AUTH_COOKIE_SECURE === 'true'
-    : true;
+const cookieSecure = false;
+// 'AUTH_COOKIE_SECURE' in process.env
+//   ? process.env.AUTH_COOKIE_SECURE === 'true'
+//   : true;
 
 // default auth function
 // can be customised by defining one in auth.js, e.g use custom back end database

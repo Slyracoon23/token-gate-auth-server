@@ -16,7 +16,7 @@
       <h1>Moralis Login!</h1>
 
       <button id="btn-login">Moralis Metamask Login</button>
-      <!-- <button id="btn-logout">Logout</button> -->
+      <button id="btn-logout">Logout</button>
       <p id="moralis-message"></p>
     </div>
 
@@ -98,7 +98,7 @@
             signingMessage: 'Log in using Moralis',
           })
             .then(function (user) {
-              // console.log('Logged in user:', user);
+              console.log('Logged in user:', user);
               return user.get('ethAddress');
 
               //login(ethAdresss);
@@ -127,7 +127,7 @@
               console.error('Error:', error);
             });
 
-          await Moralis.User.logOut();
+          //await Moralis.User.logOut();
         }
       }
 
@@ -135,14 +135,15 @@
         await Moralis.User.logOut();
       }
 
-      const currentUser = Moralis.User.current();
-      if (currentUser) {
-        Moralis.User.logOut().then(() => {
-          const currentUser = Moralis.User.current(); // this will now be null
-        });
-      }
+      // const currentUser = Moralis.User.current();
+      // if (currentUser) {
+      //   Moralis.User.logOut().then(() => {
+      //     const currentUser = Moralis.User.current(); // this will now be null
+      //   });
+      // }
 
       document.getElementById('btn-login').onclick = moralisLogin;
+      document.getElementById('btn-logout').onclick = moralisLogout;
     </script>
     <noscript
       >JavaScript is not detected or enabled but it is required for this
