@@ -22,7 +22,7 @@ dotenv.config();
 
 // config vars
 const port = process.env.AUTH_PORT || 3000;
-const tokenSecret = process.env.AUTH_TOKEN_SECRET;
+const tokenSecret = 'secret-word'; //process.env.AUTH_TOKEN_SECRET;
 const defaultUser = 'user'; // default user when no username supplied
 const expiryDays = 7;
 const cookieSecure =
@@ -34,7 +34,7 @@ const cookieSecure =
 // can be customised by defining one in auth.js, e.g use custom back end database
 // using single password for the time being, but this could query a database etc
 let checkAuth = (user, pass) => {
-  const authPassword = process.env.AUTH_PASSWORD;
+  const authPassword = 'secret-word'; // process.env.AUTH_PASSWORD;
   if (!authPassword) {
     console.error(
       'Misconfigured server. Environment variable AUTH_PASSWORD is not configured'
