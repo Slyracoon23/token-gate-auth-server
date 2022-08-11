@@ -5,7 +5,22 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
+const Moralis = require('moralis').default;
+// Import the EvmChain dataType
+const { EvmChain } = require('@moralisweb3/evm-utils');
+
 const app = express();
+
+/* Moralis init code */
+const serverUrl = 'https://o4md0ixtksco.usemoralis.com:2053/server';
+const appId = 'bdxKDvTZLigOVGbXnS468M7SM8yQVqpGIG1FcxV0';
+const masterKey = '7vFUBZKYujLvfInYOSDXIK3EdUf3MdSYgZ8lXQtm';
+
+const apiKey =
+  '5H0bijKsyuEiqHCUMrIzJj1FDYJd6HscTytAA9sx7isr2eMsriq1W4RUgIx4L755';
+
+const tokenAddress = '0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5'; // ENS NFTS
+const chain = EvmChain.ETHEREUM;
 
 // rate limiter used on auth attempts
 const apiLimiter = rateLimit({
@@ -33,7 +48,16 @@ const cookieSecure =
 // default auth function
 // can be customised by defining one in auth.js, e.g use custom back end database
 // using single password for the time being, but this could query a database etc
-let checkAuth = (user, pass) => {
+let checkAuth = (user, ethAddress) => {
+  // const response = Moralis.EvmApi.account.getNFTsForContract({
+  //   ethAddress,
+  //   tokenAddress,
+  //   chain,
+  // });
+  // console.log(response.result);
+
+  // return true;
+
   const authPassword = 'secret-word'; // process.env.AUTH_PASSWORD;
   if (!authPassword) {
     console.error(
@@ -41,7 +65,6 @@ let checkAuth = (user, pass) => {
     );
     process.exit(1);
   }
-
   // check for correct user password
   if (pass === authPassword) return true;
   return false;
@@ -160,28 +183,29 @@ app.get('/auth', (req, res, next) => {
 
 // endpoint called by login page, username and password posted as JSON body
 app.post('/login', apiLimiter, (req, res) => {
-  const { username, password } = req.body;
+  const { username } = req.body;
+  //console.log(ethAddress);
 
-  if (checkAuth(username, password)) {
-    // successful auth
-    const user = username || defaultUser;
+  // if (checkAuth(username, ethAddress)) {
+  // successful auth
+  const user = username || defaultUser;
 
-    // generate JWT
-    const token = jwt.sign({ user }, tokenSecret, {
-      expiresIn: `${expiryDays}d`,
-    });
+  // generate JWT
+  const token = jwt.sign({ user }, tokenSecret, {
+    expiresIn: `${expiryDays}d`,
+  });
 
-    // set JWT as cookie, 7 day age
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      maxAge: 1000 * 86400 * expiryDays, // milliseconds
-      secure: cookieSecure,
-    });
-    return res.send({ status: 'ok' });
-  }
+  // set JWT as cookie, 7 day age
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    maxAge: 1000 * 86400 * expiryDays, // milliseconds
+    secure: cookieSecure,
+  });
+  return res.send({ status: 'ok' });
+  // }
 
   // failed auth
-  res.status(401).send({ status: 'fail', message: 'Invalid credentials' });
+  //res.status(401).send({ status: 'fail', message: 'Invalid credentials' });
 });
 
 // force logout
@@ -201,4 +225,10 @@ app.use((req, res, next) => {
   res.status(404).send('No such page');
 });
 
-app.listen(port, () => console.log(`Listening at http://localhost:${port}`));
+const startServer = async () => {
+  await Moralis.start({ apiKey });
+
+  app.listen(port, () => console.log(`Listening at http://localhost:${port}`));
+};
+
+startServer();

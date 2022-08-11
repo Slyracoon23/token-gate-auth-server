@@ -8,11 +8,20 @@
   </head>
   <body>
     <div class="container" id="content" style="display: none">
-      <h1>Login</h1>
+      <!-- <h1>Login</h1>
       <input type="password" name="password" id="password" />
       <input type="submit" value="Login" id="login" />
       <p id="message"></p>
+    </div> -->
+      <h1>Moralis Login!</h1>
+
+      <button id="btn-login">Moralis Metamask Login</button>
+      <!-- <button id="btn-logout">Logout</button> -->
+      <p id="moralis-message"></p>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/moralis-v1/dist/moralis.js"></script>
 
     <script>
       // make content visible, hidden by default, <noscript> content will show error message for non-JS browsers.
@@ -23,11 +32,11 @@
       document.title = 'Log in to ' + location.host;
 
       // post password to /auth
-      const login = (password) => {
+      const login = () => {
         fetch('/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password }),
+          // body: JSON.stringify({ ethAddress }),
         })
           .then((response) => {
             // check for auth failure for rejected credentials
@@ -52,28 +61,89 @@
           });
       };
 
-      // handle password text field
-      const input = document.getElementById('password');
-      input.focus();
-      input.addEventListener('keyup', (e) => {
-        e.preventDefault();
-        if (e.key === 'Enter') {
-          const password = input.value;
-          input.value = ''; // clear input
-          login(password);
-        }
-      });
+      // // handle password text field
+      // const input = document.getElementById('password');
+      // input.focus();
+      // input.addEventListener('keyup', (e) => {
+      //   e.preventDefault();
+      //   if (e.key === 'Enter') {
+      //     const password = input.value;
+      //     input.value = ''; // clear input
+      //     login(password);
+      //   }
+      // });
 
-      // handle submit / login button
-      const submit = document.getElementById('login');
-      submit.addEventListener('click', (e) => {
-        e.preventDefault();
-        const password = input.value;
-        input.value = ''; // clear input
-        login(password);
-      });
+      // // handle submit / login button
+      // const submit = document.getElementById('login');
+      // submit.addEventListener('click', (e) => {
+      //   e.preventDefault();
+      //   const password = input.value;
+      //   input.value = ''; // clear input
+      //   login(password);
+      // });
     </script>
 
+    <script>
+      // MORALIS LOGIN LOGIC
+      /* Moralis init code */
+      const serverUrl = 'https://o4md0ixtksco.usemoralis.com:2053/server';
+      const appId = 'bdxKDvTZLigOVGbXnS468M7SM8yQVqpGIG1FcxV0';
+      Moralis.start({ serverUrl, appId });
+
+      /* Add Moralis Authentication code */
+      async function moralisLogin() {
+        let user = Moralis.User.current();
+        if (!user) {
+          user = await Moralis.authenticate({
+            signingMessage: 'Log in using Moralis',
+          })
+            .then(function (user) {
+              // console.log('Logged in user:', user);
+              return user.get('ethAddress');
+
+              //login(ethAdresss);
+            })
+            .then(async function (ethAddress) {
+              console.log(ethAddress);
+              const options = {
+                chain: 'eth',
+                address: ethAddress,
+                token_address: '0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85',
+              };
+
+              const NFTs = await Moralis.Web3API.account.getNFTsForContract(
+                options
+              );
+
+              if (NFTs.result.length > 0) {
+                login();
+              } else {
+                // NFT does not exist, give feedback to user
+                const message = document.getElementById('moralis-message');
+                message.innerText = 'Do not have the NFT';
+              }
+            })
+            .catch(function (error) {
+              console.error('Error:', error);
+            });
+
+          await Moralis.User.logOut();
+        }
+      }
+
+      async function moralisLogout() {
+        await Moralis.User.logOut();
+      }
+
+      const currentUser = Moralis.User.current();
+      if (currentUser) {
+        Moralis.User.logOut().then(() => {
+          const currentUser = Moralis.User.current(); // this will now be null
+        });
+      }
+
+      document.getElementById('btn-login').onclick = moralisLogin;
+    </script>
     <noscript
       >JavaScript is not detected or enabled but it is required for this
       site.</noscript
