@@ -1,0 +1,39 @@
+server {
+       listen 81;
+       listen [::]:81;
+
+       server_name example.ubuntu.com;
+
+       root /var/www/tutorial;
+       index index.html;
+
+	 location / {
+               auth_request /auth;
+               error_page 401 = @error401;
+
+               auth_request_set $user $upstream_http_x_forwarded_user;
+               proxy_set_header X-Forwarded-User $user;
+               proxy_pass http://example:81
+
+       }
+
+
+       location /auth {
+               internal;
+               proxy_set_header Host $host;
+               proxy_pass_request_body;
+               proxy_set_header Content-Length "";
+               proxy_pass http://login-site:82;
+	      
+	}
+
+
+       location @erro401 {
+	       add_header Set-Cookie "NSREDIRECT=$scheme://$http_host$request_uri;Domain=example.ubuntu.com;PATH=/";
+	       return 302 http://login-site:82;
+
+	}
+
+
+}
+
