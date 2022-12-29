@@ -123,3 +123,66 @@ location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
 - [NGINX sub request authentication](https://docs.nginx.com/nginx/admin-guide/security-controls/configuring-subrequest-authentication/)
 - [Using JWTs with NodeJS tutorial](https://www.digitalocean.com/community/tutorials/nodejs-jwt-expressjs)
 - [jsonwebtoken node module](https://github.com/auth0/node-jsonwebtoken)
+
+# MERCX Guide
+
+## ssh into server
+
+```
+ssh -i "SuprSketch.pem" ec2-user@ec2-54-151-114-224.us-west-1.compute.amazonaws.com
+```
+
+## Go to the html directory
+
+```
+cd /usr/share/nginx/
+```
+The foulder `./suprsketch` is where the application lives. It hold the html and js files of the main application that nginx servers.
+
+## Go to the nginx conf
+
+```
+cd /etc/nginx
+```
+This is where the nginx conf files live
+
+Edit files if neccesary
+```
+vim nginx.conf
+```
+## Run the nginx service
+Check the status of nginx
+```
+sudo systemctrl status nginx
+```
+If it is dead. Restart it
+
+```
+sudo systemctl restart nginx.service
+```
+sometimes you need to kill 
+```
+sudo killall nginx
+```
+and for good measure reload the change of the nginx file
+```
+sudo nginx -s reload
+```
+
+## Go to the nodejs authenticator
+
+```
+cd /home/ec2-user/token-gate-auth-server-ep-moralis-basic-nft-gating
+```
+
+## Run the node app without any holdup
+```
+nohup node app.js &
+```
+Sometimes you need to kill any background running processes
+
+# SSL issues
+Remember to renew your SSL stuff
+
+
+
