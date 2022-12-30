@@ -184,5 +184,13 @@ Sometimes you need to kill any background running processes
 # SSL issues
 Remember to renew your SSL stuff
 
+Certs live here
+```
+/etc/pki/tls/certs
+```
+And private key lives here
+```
+/etc/pki/tls/private
+```
 
 
