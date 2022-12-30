@@ -200,3 +200,5 @@ cat cert.pem cabundle.pem >> combined.pem
 ```
 and set ssl_certificate to 'combined.pem'
 
+# Configure  OSCP Stapling
+ configure OCSP Stapling on your server, 
