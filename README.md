@@ -192,5 +192,11 @@ And private key lives here
 ```
 /etc/pki/tls/private
 ```
+## Remember to merge the CA_bundle and your CRT
 
+merge the cabundle and certificate into one file
+```
+cat cert.pem cabundle.pem >> combined.pem
+```
+and set ssl_certificate to 'combined.pem'
 
