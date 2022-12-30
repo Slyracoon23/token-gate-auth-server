@@ -202,3 +202,10 @@ and set ssl_certificate to 'combined.pem'
 
 # Configure  OSCP Stapling
  configure OCSP Stapling on your server, 
+
+! It actually need a huge lift to support OSCP
+It seems firefox is only erroring out because of lack of OSCP support
+https://stackoverflow.com/questions/12142907/error-sec-error-revoked-certificate-when-viewed-in-firefox-only
+
+Just follow the tutorial and users will be able to bypass this extra features
+
