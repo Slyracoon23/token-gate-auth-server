@@ -13,15 +13,21 @@
       <input type="submit" value="Login" id="login" />
       <p id="message"></p>
     </div> -->
-      <h1>Moralis Login!</h1>
+      <h1>SuprSketch Login!</h1>
 
-      <button id="btn-login">Moralis Metamask Login</button>
-      <button id="btn-logout">Logout</button>
+      <button id="btn-login">Metamask Login</button>
+      <!-- <button id="btn-logout">Logout</button> -->
       <p id="moralis-message"></p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script src="https://unpkg.com/moralis-v1/dist/moralis.js"></script>
+    <!-- <script src="https://unpkg.com/moralis-v1@1.11.0/dist/moralis.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
 
     <script>
       // make content visible, hidden by default, <noscript> content will show error message for non-JS browsers.
@@ -84,68 +90,80 @@
     </script>
 
     <script>
-      // MORALIS LOGIN LOGIC
-      /* Moralis init code */
-      const serverUrl = 'https://o4md0ixtksco.usemoralis.com:2053/server';
-      const appId = 'bdxKDvTZLigOVGbXnS468M7SM8yQVqpGIG1FcxV0';
-      Moralis.start({ serverUrl, appId });
+      const connectToMetamask = async () => {
+        const provider = new ethers.providers.Web3Provider(
+          window.ethereum,
+          'any'
+        );
 
-      /* Add Moralis Authentication code */
-      async function moralisLogin() {
-        let user = Moralis.User.current();
-        if (!user) {
-          user = await Moralis.authenticate({
-            signingMessage: 'Log in using Moralis',
-          })
-            .then(function (user) {
-              console.log('Logged in user:', user);
-              return user.get('ethAddress');
+        const [accounts, chainId] = await Promise.all([
+          provider.send('eth_requestAccounts', []),
+          provider.send('eth_chainId', []),
+        ]);
 
-              //login(ethAdresss);
-            })
-            .then(async function (ethAddress) {
-              console.log(ethAddress);
-              const options = {
-                chain: 'eth',
-                address: ethAddress,
-                token_address: '0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85',
-              };
+        const signer = provider.getSigner();
+        const result = { signer, chain: chainId, account: accounts[0] };
+        console.log(result);
+        return result;
+      };
 
-              const NFTs = await Moralis.Web3API.account.getNFTsForContract(
-                options
-              );
+      const handleAuth = async () => {
+        // Connect to Metamask
+        const { signer, chain, account } = await connectToMetamask();
 
-              if (NFTs.result.length > 0) {
-                login();
-              } else {
-                // NFT does not exist, give feedback to user
-                const message = document.getElementById('moralis-message');
-                message.innerText = 'Do not have the NFT';
-              }
-            })
-            .catch(function (error) {
-              console.error('Error:', error);
-            });
-
-          //await Moralis.User.logOut();
+        if (!account) {
+          throw new Error('No account found');
         }
-      }
+        if (!chain) {
+          throw new Error('No chain found');
+        }
 
-      async function moralisLogout() {
-        await Moralis.User.logOut();
-        console.log('Logout');
-      }
+        // const { message } = await requestMessage(account, chain);
 
-      // const currentUser = Moralis.User.current();
-      // if (currentUser) {
-      //   Moralis.User.logOut().then(() => {
-      //     const currentUser = Moralis.User.current(); // this will now be null
-      //   });
-      // }
+        const message = 'Log in using SuperSketch Club NFT';
 
-      document.getElementById('btn-login').onclick = moralisLogin;
-      document.getElementById('btn-logout').onclick = moralisLogout;
+        const signature = await signer.signMessage(message);
+
+        // check if user has NFT
+
+        fetchNFTs(account);
+      };
+
+      const fetchNFTs = async (address) => {
+        const contract_address = '0x3ad9c40e0c104515fc31c39230e7f3f334dd6587'; // NFT contract address
+
+        const options = {
+          method: 'GET',
+          headers: {
+            accept: 'application/json',
+            Authorization: '1411e390-1a31-46ac-8b79-b846e8d7ad2e',
+          },
+        };
+
+        const NFTs = fetch(
+          `https://api.nftport.xyz/v0/accounts/${address}?chain=ethereum&page_size=50&include=metadata&contract_address=0x3ad9c40e0c104515fc31c39230e7f3f334dd6587`,
+          options
+        )
+          .then((response) => response.json())
+          .then((response) => {
+            const NFTs = response.nfts;
+
+            if (_.some(NFTs, { contract_address: contract_address })) {
+              console.log('NFT exists');
+              login();
+            } else {
+              console.log('NFT does not exist');
+              // NFT does not exist, give feedback to user
+              const message = document.getElementById('moralis-message');
+              message.innerText = 'Do not have the NFT';
+            }
+          })
+          .catch((err) => console.error(err));
+      };
+
+      document.getElementById('btn-login').onclick = handleAuth;
     </script>
+
     <noscript
       >JavaScript is not detected or enabled but it is required for this
       site.</noscript
